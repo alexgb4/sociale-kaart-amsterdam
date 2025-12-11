@@ -1,86 +1,188 @@
-#map {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 300px; /* width of sidebar */
-  right: 0;
-}
-
-#sidebar {
-  position:absolute;left:0;top:0;bottom:0;width:300px;
-  background:#fff;overflow:auto;padding:10px;
-  border-right:2px solid #ccc;transition:transform 0.3s;
-}
-#sidebar.collapsed {transform:translateX(-280px);}
-#toggle-btn {position:absolute;top:10px;right:10px;}
-.wijk-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: #333;
-  text-shadow: 0 0 4px rgba(255, 255, 255, 0.9);
-}
-
-.stadsdeel-label {
-  font-size: 13px;
-  font-weight: 700;
-  color: #000;
-  text-shadow: 0 0 4px rgba(255, 255, 255, 0.9);
-}
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
   width: 100%;
   overflow: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/* Map fills full window */
-#map {
+/* Layout: sidebar + map */
+#sidebar {
   position: fixed;
   top: 0;
-  bottom: 0;
   left: 0;
-  right: 0;
+  bottom: 0;
+  width: 300px;
+  background: #ffffff;
+  box-shadow: 2px 0 6px rgba(0,0,0,0.18);
+  z-index: 600;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px 10px 12px;
+  box-sizing: border-box;
+  transition: transform 0.3s ease;
 }
 
-/* Filter panel top-left */
-#filter-panel {
-  position: fixed;
+#sidebar.collapsed {
+  transform: translateX(-260px);
+}
+
+#toggle-btn {
+  position: absolute;
   top: 10px;
-  left: 10px;
-  z-index: 500;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 8px 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  max-width: 260px;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 13px;
+  right: -18px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  font-size: 14px;
+}
+
+/* Header */
+#sidebar-header h1 {
+  font-size: 18px;
+  margin: 0 0 6px 0;
+}
+
+#group-mode {
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+#group-mode span {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+#group-mode label {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+/* Filters */
+#filter-panel {
+  border-top: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 8px 0;
+  margin-bottom: 6px;
 }
 
 .filter-row {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 #filter-panel label {
   display: block;
   font-weight: 600;
   margin-bottom: 2px;
+  font-size: 13px;
 }
 
 #filter-panel select {
   width: 100%;
   font-size: 13px;
   padding: 2px 4px;
+  box-sizing: border-box;
 }
 
+/* Categories checkbox list */
 #categories {
-  max-height: 200px;
+  max-height: 140px;
   overflow-y: auto;
-  margin-top: 4px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 4px;
+  box-sizing: border-box;
 }
 
-/* Existing label styles (keep or add if missing) */
+.cat-row {
+  margin-bottom: 3px;
+  font-size: 12px;
+}
+
+.cat-color-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid #444;
+  margin-right: 6px;
+}
+
+/* Legend */
+#legend {
+  padding: 6px 0 4px 0;
+  font-size: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+#legend .title {
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+
+#legend .item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+#legend .color {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid #444;
+  margin-right: 6px;
+}
+
+/* Organisation list */
+#org-list {
+  flex: 1;
+  overflow-y: auto;
+  padding-top: 6px;
+  font-size: 12px;
+}
+
+.org-list-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.org-category {
+  margin-bottom: 6px;
+}
+
+.org-category-title {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.org-item {
+  margin-left: 10px;
+  margin-bottom: 2px;
+  cursor: pointer;
+}
+
+.org-item:hover {
+  text-decoration: underline;
+}
+
+/* Map */
+#map {
+  position: fixed;
+  top: 0;
+  left: 300px;
+  right: 0;
+  bottom: 0;
+}
+
+/* Tooltip labels for polygons */
 .wijk-label {
   font-size: 11px;
   font-weight: 600;
@@ -92,5 +194,5 @@ html, body {
   font-size: 13px;
   font-weight: 700;
   color: #000;
-  text-shadow: 0 0 4px rgba(255, 255, 255, 0.9);
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.95);
 }

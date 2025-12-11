@@ -1,50 +1,64 @@
 <!DOCTYPE html>
-<html>
+<html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <title>Amsterdam Map v3</title>
+  <meta charset="UTF-8" />
+  <title>Sociale Kaart Amsterdam</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
-<div id="sidebar">
-  <button id="toggle-btn">⮜</button>
-  <h2>Categorieën</h2>
-  <div id="categories"></div>
-  <h2>Organisaties</h2>
-  <ul id="org-list"></ul>
-</div>
-<body>
-  <div id="filter-panel">
-    <div class="filter-row">
-      <label for="filter-stadsdeel">Stadsdeel</label>
-      <select id="filter-stadsdeel">
-        <option value="">Alle stadsdelen</option>
-      </select>
+  <div id="sidebar">
+    <button id="toggle-btn" title="Zijbalk in-/uitklappen">⮜</button>
+
+    <div id="sidebar-header">
+      <h1>Sociale Kaart</h1>
+      <div id="group-mode">
+        <span>Groeperen op:</span>
+        <label>
+          <input type="radio" name="group-mode" value="category" checked />
+          Categorie
+        </label>
+        <label>
+          <input type="radio" name="group-mode" value="wijk" />
+          Wijk
+        </label>
+      </div>
     </div>
 
-    <div class="filter-row">
-      <label for="filter-wijk">Wijk</label>
-      <select id="filter-wijk">
-        <option value="">Alle wijken</option>
-      </select>
+    <div id="filter-panel">
+      <div class="filter-row">
+        <label for="filter-stadsdeel">Stadsdeel</label>
+        <select id="filter-stadsdeel">
+          <option value="">Alle stadsdelen</option>
+        </select>
+      </div>
+
+      <div class="filter-row">
+        <label for="filter-wijk">Wijk</label>
+        <select id="filter-wijk">
+          <option value="">Alle wijken</option>
+        </select>
+      </div>
+
+      <div class="filter-row">
+        <span>Categorieën</span>
+      </div>
+      <div id="categories"></div>
     </div>
 
-    <div class="filter-row">
-      <span>Categorieën</span>
-    </div>
+    <div id="legend"></div>
 
-    <div id="categories"></div>
+    <div id="org-list">
+      <div class="org-list-title">Organisaties in zicht</div>
+      <div id="org-list-content"></div>
+    </div>
   </div>
 
   <div id="map"></div>
 
   <script src="map.js"></script>
-</body>
-
-
-<script src="map.js"></script>
 </body>
 </html>
