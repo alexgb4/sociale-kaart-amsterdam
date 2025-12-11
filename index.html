@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Amsterdam Map v3</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+<div id="sidebar">
+  <button id="toggle-btn">⮜</button>
+  <h2>Categorieën</h2>
+  <div id="categories"></div>
+  <h2>Organisaties</h2>
+  <ul id="org-list"></ul>
+</div>
+<body>
+  <div id="filter-panel">
+    <div class="filter-row">
+      <label for="filter-stadsdeel">Stadsdeel</label>
+      <select id="filter-stadsdeel">
+        <option value="">Alle stadsdelen</option>
+      </select>
+    </div>
+
+    <div class="filter-row">
+      <label for="filter-wijk">Wijk</label>
+      <select id="filter-wijk">
+        <option value="">Alle wijken</option>
+      </select>
+    </div>
+
+    <div class="filter-row">
+      <span>Categorieën</span>
+    </div>
+
+    <div id="categories"></div>
+  </div>
+
+  <div id="map"></div>
+
+  <script src="map.js"></script>
+</body>
+
+
+<script src="map.js"></script>
+</body>
+</html>
