@@ -34,7 +34,8 @@ var categoryColors = {
   'Vrouwen organisaties': '#fb9a99',
   'Woonzorg centrum': '#1f78b4',
   'App': '#6a3d9a',
-  'Meiden organisaties': '#e7298a'
+   'Meiden organisaties': '#e7298a',
+  'Religieuze organisaties': '#b15928'
 };
 
 function getCategoryColor(cat) {
@@ -54,6 +55,20 @@ function getCategoryColor(cat) {
 // Normalize categories (merge variants)
 function normalizeCategory(cat) {
   cat = (cat || '').trim();
+// --- CATEGORY MERGES ---
+
+// Religieuze: singular -> plural
+if (cat === 'Religieuze organisatie')
+  return 'Religieuze organisaties';
+
+// Buurtcentrum + (Informele) Zorgdragers -> Buurtcentrum
+if (cat === 'Buurtcentrum/(Informele) Zorgdragers')
+  return 'Buurtcentrum';
+
+// Sport: spelling variant -> plural
+if (cat === 'Sport vereniging')
+  return 'Sportverenigingen';
+
 
   if (cat === 'Buurt centrum') return 'Buurtcentrum';
   if (cat === 'Buurt meda') return 'Buurt media';
