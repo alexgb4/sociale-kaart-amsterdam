@@ -140,8 +140,9 @@ Papa.parse("Organisaties.csv", {
       var cat = normalizeCategory(catRaw);
       categoriesSet.add(cat);
 
-      var lat = parseFloat(row['Latitude']);
-      var lon = parseFloat(row['Longitude']);
+      var lat = parseFloat(String(row['Latitude'] || '').replace(',', '.'));
+      var lon = parseFloat(String(row['Longitude'] || '').replace(',', '.'));
+
       if (!lat || !lon || isNaN(lat) || isNaN(lon)) return;
 
       var popupLines = [];
