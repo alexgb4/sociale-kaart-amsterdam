@@ -20,23 +20,21 @@ var wijkenSet = new Set();
 // Category color mapping (same as before, with merges in normalizeCategory)
 var categoryColors = {
   'Basisscholen': '#ff7f00',
-  'Bewonersgroepen': '#1b9e77',
+  'Bewonersgroepen': '#a6cee3',            // light blue
   'Buurtcentrum': '#e41a1c',
   'Buurt media': '#377eb8',
   'Cultureel centrum': '#984ea3',
-  'Hogescholen/Universiteiten': '#4daf4a',
+  'Hogescholen/Universiteiten': '#6a3d9a', // purple
   'Informele zorgdragers': '#ffff33',
   'Jongeren organisaties': '#a65628',
   'MBO': '#8dd3c7',
   'Opvang': '#fb8072',
-  'Sportverenigingen': '#f781bf',
+  'Sportverenigingen': '#1f78b4',          // blue
   'Voortgezet onderwijs': '#999999',
-  'Vrouwen organisaties': '#fb9a99',
-  'Woonzorg centrum': '#1f78b4',
-  'App': '#6a3d9a',
-   'Meiden organisaties': '#e7298a',
+  'Vrouwen organisaties': '#f781bf',
   'Religieuze organisaties': '#b15928'
 };
+
 
 function getCategoryColor(cat) {
   cat = (cat || '').trim();
