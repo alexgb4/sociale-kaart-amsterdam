@@ -19,37 +19,38 @@ var wijkenSet = new Set();
 
 // Category color mapping (same as before, with merges in normalizeCategory)
 var categoryColors = {
-  'Informele zorgdragers': '#f9c74f',
-  'Maatschappelijke organisatie': '#90be6d',
-  'Ouder en Kind Teams': '#43aa8b',
-  'Participatieorganisatie': '#4d908e',
+  'Informele zorgdragers': '#ffdd00',          // bright yellow
+  'Maatschappelijke organisatie': '#006400',  // dark green
+  'Ouder en Kind Teams': '#00a676',            // vivid teal
+  'Participatieorganisatie': '#0047ab',       // strong cobalt blue
 
-  'Basisscholen': '#f9844a',
-  'MBO': '#4cc9f0',
-  'Voortgezet onderwijs': '#6c757d',
-  'Hogescholen/Universiteiten': '#560bad',
+  'Basisscholen': '#ff8c00',                   // dark orange
+  'MBO': '#00b4d8',                            // cyan
+  'Voortgezet onderwijs': '#7a7a7a',           // mid grey
+  'Hogescholen/Universiteiten': '#5a189a',     // deep purple
 
-  'Jongeren organisaties': '#9d4edd',
-  'Kinderopvang': '#f3722c',
-  'Opvang': '#f94144',
+  'Jongeren organisaties': '#c1121f',          // crimson
+  'Kinderopvang': '#ff595e',                   // bright coral
+  'Opvang': '#8b0000',                         // dark red
 
-  'Bewonersgroepen': '#4895ef',
-  'Buurtcentrum': '#d00000',
-  'Buurt media': '#4361ee',
-  'Buurt team': '#3a0ca3',
-  'Buurtbemiddelaar': '#240046',
+  'Bewonersgroepen': '#1d3557',                // navy
+  'Buurtcentrum': '#e10600',                   // fire red
+  'Buurt media': '#0077b6',                    // strong blue
+  'Buurt team': '#3c096c',                     // indigo
+  'Buurtbemiddelaar': '#000000',               // black
 
-  'Cultureel centrum': '#7209b7',
-  'Religieuze organisaties': '#8d5524',
+  'Cultureel centrum': '#9b5de5',              // electric purple
+  'Religieuze organisaties': '#7f5539',        // dark brown
 
-  'Sportvereniging': '#2ec4b6',
-  'Sportverenigingen': '#118ab2',
+  'Sportvereniging': '#00f5d4',                // neon turquoise
+  'Sportverenigingen': '#03045e',              // deep blue
 
-  'Wildplakken': '#ffbe0b',
-  'Plakzuilen': '#e09f3e',
+  'Wildplakken': '#ffb000',                    // signal yellow-orange
+  'Plakzuilen': '#bc6c25',                     // ochre
 
-  'Vrouwen organisaties': '#f781bf'
+  'Vrouwen organisaties': '#f781bf'            // KEEP (pink)
 };
+
 
 
 
