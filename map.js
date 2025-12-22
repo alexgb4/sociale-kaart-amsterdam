@@ -19,13 +19,13 @@ var wijkenSet = new Set();
 
 // Category color mapping (same as before, with merges in normalizeCategory)
 var categoryColors = {
-  'Informele zorgdragers': '#ffd166',
-  'Maatschappelijke organisatie': '#6a994e',
-  'Ouder en Kind Teams': '#8ac926',
-  'Participatieorganisatie': '#52796f',
+  'Informele zorgdragers': '#f9c74f',
+  'Maatschappelijke organisatie': '#90be6d',
+  'Ouder en Kind Teams': '#43aa8b',
+  'Participatieorganisatie': '#4d908e',
 
-  'Basisscholen': '#ff9f1c',
-  'MBO': '#48bfe3',
+  'Basisscholen': '#f9844a',
+  'MBO': '#4cc9f0',
   'Voortgezet onderwijs': '#6c757d',
   'Hogescholen/Universiteiten': '#560bad',
 
@@ -33,7 +33,7 @@ var categoryColors = {
   'Kinderopvang': '#f3722c',
   'Opvang': '#f94144',
 
-  'Bewonersgroepen': '#4cc9f0',
+  'Bewonersgroepen': '#4895ef',
   'Buurtcentrum': '#d00000',
   'Buurt media': '#4361ee',
   'Buurt team': '#3a0ca3',
@@ -42,14 +42,15 @@ var categoryColors = {
   'Cultureel centrum': '#7209b7',
   'Religieuze organisaties': '#8d5524',
 
-  'Sportvereniging': '#2a9d8f',
-  'Sportverenigingen': '#277da1',
+  'Sportvereniging': '#2ec4b6',
+  'Sportverenigingen': '#118ab2',
 
   'Wildplakken': '#ffbe0b',
-  'Plakzuilen': '#f4a261',
+  'Plakzuilen': '#e09f3e',
 
   'Vrouwen organisaties': '#f781bf'
 };
+
 
 
 
