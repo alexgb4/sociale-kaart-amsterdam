@@ -19,21 +19,23 @@ var wijkenSet = new Set();
 
 // Category color mapping (same as before, with merges in normalizeCategory)
 var categoryColors = {
-  'Basisscholen': '#ff7f00',
-  'Bewonersgroepen': '#a6cee3',            // light blue
-  'Buurtcentrum': '#e41a1c',
-  'Buurt media': '#377eb8',
-  'Cultureel centrum': '#984ea3',
-  'Hogescholen/Universiteiten': '#6a3d9a', // purple
-  'Informele zorgdragers': '#ffff33',
-  'Jongeren organisaties': '#a65628',
-  'MBO': '#8dd3c7',
-  'Opvang': '#fb8072',
-  'Sportverenigingen': '#1f78b4',          // blue
-  'Voortgezet onderwijs': '#999999',
-  'Vrouwen organisaties': '#f781bf',
-  'Religieuze organisaties': '#b15928'
+  'Basisscholen': '#ff9f1c',                // orange
+  'Bewonersgroepen': '#4cc9f0',             // cyan
+  'Buurtcentrum': '#d00000',                // red
+  'Buurt media': '#4361ee',                  // blue
+  'Cultureel centrum': '#7209b7',            // purple
+  'Hogescholen/Universiteiten': '#560bad',   // dark purple
+  'Informele zorgdragers': '#ffd166',        // yellow
+  'Jongeren organisaties': '#9d4edd',       // violet
+  'MBO': '#48bfe3',                          // sky blue
+  'Opvang': '#f94144',                       // coral red
+  'Sportverenigingen': '#277da1',            // teal blue
+  'Voortgezet onderwijs': '#6c757d',         // neutral grey
+  'Vrouwen organisaties': '#f781bf',         // KEEP (pink)
+  'Religieuze organisaties': '#8d5524',      // brown
+  'Wildplakken': '#ffbe0b'                   // NEW (yellow-orange)
 };
+
 
 
 function getCategoryColor(cat) {
