@@ -19,22 +19,38 @@ var wijkenSet = new Set();
 
 // Category color mapping (same as before, with merges in normalizeCategory)
 var categoryColors = {
-  'Basisscholen': '#ff9f1c',                // orange
-  'Bewonersgroepen': '#4cc9f0',             // cyan
-  'Buurtcentrum': '#d00000',                // red
-  'Buurt media': '#4361ee',                  // blue
-  'Cultureel centrum': '#7209b7',            // purple
-  'Hogescholen/Universiteiten': '#560bad',   // dark purple
-  'Informele zorgdragers': '#ffd166',        // yellow
-  'Jongeren organisaties': '#9d4edd',       // violet
-  'MBO': '#48bfe3',                          // sky blue
-  'Opvang': '#f94144',                       // coral red
-  'Sportverenigingen': '#277da1',            // teal blue
-  'Voortgezet onderwijs': '#6c757d',         // neutral grey
-  'Vrouwen organisaties': '#f781bf',         // KEEP (pink)
-  'Religieuze organisaties': '#8d5524',      // brown
-  'Wildplakken': '#ffbe0b'                   // NEW (yellow-orange)
+  'Informele zorgdragers': '#ffd166',
+  'Maatschappelijke organisatie': '#6a994e',
+  'Ouder en Kind Teams': '#8ac926',
+  'Participatieorganisatie': '#52796f',
+
+  'Basisscholen': '#ff9f1c',
+  'MBO': '#48bfe3',
+  'Voortgezet onderwijs': '#6c757d',
+  'Hogescholen/Universiteiten': '#560bad',
+
+  'Jongeren organisaties': '#9d4edd',
+  'Kinderopvang': '#f3722c',
+  'Opvang': '#f94144',
+
+  'Bewonersgroepen': '#4cc9f0',
+  'Buurtcentrum': '#d00000',
+  'Buurt media': '#4361ee',
+  'Buurt team': '#3a0ca3',
+  'Buurtbemiddelaar': '#240046',
+
+  'Cultureel centrum': '#7209b7',
+  'Religieuze organisaties': '#8d5524',
+
+  'Sportvereniging': '#2a9d8f',
+  'Sportverenigingen': '#277da1',
+
+  'Wildplakken': '#ffbe0b',
+  'Plakzuilen': '#f4a261',
+
+  'Vrouwen organisaties': '#f781bf'
 };
+
 
 
 
