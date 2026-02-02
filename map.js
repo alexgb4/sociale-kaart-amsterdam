@@ -47,9 +47,9 @@ var categoryColors = {
 
   'Wildplakken': '#ffb000',
   'Plakzuilen': '#bc6c25',
-
-  'Vrouwen organisaties': '#f781bf',  // <-- comma added
+  'Vrouwen organisaties': '#f781bf',
   'Stadsdorpen': '#6a4c93'
+
 };
 
 
@@ -89,11 +89,9 @@ if (cat === 'Buurtcentrum/(Informele) Zorgdragers')
 if (cat === 'Sport vereniging')
   return 'Sportverenigingen';
 // Sportvereniging → Sportverenigingen
-if (cat === 'Sportvereniging')
-  return 'Sportverenigingen';
+if (cat === 'Sportvereniging') return 'Sportverenigingen';
+if (cat === 'Sport vereniging') return 'Sportverenigingen';
 
-if (cat === 'Sport vereniging')
-  return 'Sportverenigingen';
 
 
   if (cat === 'Buurt centrum') return 'Buurtcentrum';
