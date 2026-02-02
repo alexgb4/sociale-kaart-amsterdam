@@ -140,86 +140,130 @@ function pastelColor(name) {
 }
 
 // Load CSV with organisations
-Papa.parse("Organisaties.csv", {
-  download: true,
-  header: true,
-  skipEmptyLines: true,
-  complete: function(results) {
-    var data = results.data || [];
-    var seen = {};
+function cleanNumber(x) {
+  if (x === null || x === undefined) return NaN;
+  // handle "4,894164541" and "4.894164541"
+  return parseFloat(String(x).trim().replace(',', '.'));
+}
 
-    data.forEach(function(row) {
-      var name = (row['Vestigingnaam'] || row['Vestigingnaam '] || row['Naam'] || '').trim();
-      var pc6  = (row['PC6'] || '').trim();
-      if (!name && !pc6) return;
+function getAny(row, keys) {
+  // tries multiple possible header names (including typos/spaces)
+  for (var i = 0; i < keys.length; i++) {
+    var k = keys[i];
+    if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') {
+      return String(row[k]).trim();
+    }
+  }
+  // also try "same key but with extra spaces" cases
+  var rowKeys = Object.keys(row);
+  for (var j = 0; j < keys.length; j++) {
+    var wanted = keys[j].toLowerCase().replace(/\s+/g, '');
+    for (var r = 0; r < rowKeys.length; r++) {
+      var candidate = rowKeys[r].toLowerCase().replace(/\s+/g, '');
+      if (candidate === wanted) {
+        var v = row[rowKeys[r]];
+        if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
+      }
+    }
+  }
+  return '';
+}
 
-      var key = (name.toLowerCase() || '') + '|' + (pc6.toLowerCase() || '');
-      if (seen[key]) return;
-      seen[key] = true;
+fetch('Organisaties.csv')
+  .then(function (r) { return r.text(); })
+  .then(function (text) {
+    // Remove weird leading ";;;;;;" lines
+    text = text.replace(/^(;+\s*\r?\n)+/g, '');
 
-      var gemeente = (row['Gemeente'] || '').trim();
-      if (gemeente === 'Diemen') return;
+    Papa.parse(text, {
+      header: true,
+      delimiter: ';',
+      skipEmptyLines: 'greedy',
+      transformHeader: function (h) { return (h || '').trim(); },
+      complete: function (results) {
+        var data = results.data || [];
+        var seen = {};
 
-      var wijk = (row['Wijk'] || '').trim();
-      var sd   = (row['Stadsdeel'] || '').trim();
-      var buurt = (row['Buurten'] || '').trim();
+        data.forEach(function (row) {
+          var name = getAny(row, ['Vestigingnaam', 'Vestigingnaam ', 'Naam']);
+          var pc6  = getAny(row, ['PC6', 'Pc6', 'Postcode', 'Postcode6']);
 
-      if (sd)   stadsdelenSet.add(sd);
-      if (wijk) wijkenSet.add(wijk);
+          if (!name && !pc6) return;
 
-      var catRaw = (row['Instelling/Categorie'] || '').trim();
-      var cat = normalizeCategory(catRaw);
-      categoriesSet.add(cat);
+          var key = (name.toLowerCase() || '') + '|' + (pc6.toLowerCase() || '');
+          if (seen[key]) return;
+          seen[key] = true;
 
-      var lat = parseFloat(String(row['Latitude'] || '').replace(',', '.'));
-      var lon = parseFloat(String(row['Longitude'] || '').replace(',', '.'));
+          var gemeente = getAny(row, ['Gemeente']);
+          if (gemeente === 'Diemen') return;
 
-      if (!lat || !lon || isNaN(lat) || isNaN(lon)) return;
+          var wijk  = getAny(row, ['Wijk']);
+          var sd    = getAny(row, ['Stadsdeel']);
+          var buurt = getAny(row, ['Buurten', 'Buurt']);
 
-      var popupLines = [];
-      if (name) popupLines.push('<b>' + name + '</b>');
-      if (catRaw) popupLines.push(catRaw);
+          if (sd)   stadsdelenSet.add(sd);
+          if (wijk) wijkenSet.add(wijk);
 
-      var locParts = [];
-      if (buurt) locParts.push(buurt);
-      if (wijk)  locParts.push(wijk);
-      if (sd)    locParts.push(sd);
-      if (locParts.length) popupLines.push(locParts.join(', '));
-      if (pc6) popupLines.push('PC6: ' + pc6);
+          var catRaw = getAny(row, ['Instelling/Categorie', 'Instelling/ Categorie', 'Categorie', 'Category']);
+          var cat = normalizeCategory(catRaw);
+          categoriesSet.add(cat);
 
-      var color = getCategoryColor(cat);
-      var marker = L.circleMarker([lat, lon], {
-        radius: 6,
-        color: color,
-        fillColor: color,
-        weight: 1,
-        fillOpacity: 0.85,
-        pane: 'markers'
-      }).bindPopup(popupLines.join('<br>'));
+          var lat = cleanNumber(getAny(row, ['Latitude', 'Lat']));
+          var lon = cleanNumber(getAny(row, ['Longitude', 'Long', 'Lon', 'Lng']));
 
-      marker.addTo(map);
+          if (!lat || !lon || isNaN(lat) || isNaN(lon)) return;
 
-      var idx = orgMarkers.length;
-      orgMarkers.push({
-        idx: idx,
-        marker: marker,
-        category: cat,
-        rawCategory: catRaw,
-        name: name,
-        pc6: pc6,
-        stadsdeel: sd,
-        wijk: wijk,
-        buurt: buurt,
-        lat: lat,
-        lon: lon
-      });
+          var popupLines = [];
+          if (name) popupLines.push('<b>' + name + '</b>');
+          if (catRaw) popupLines.push(catRaw);
+
+          var locParts = [];
+          if (buurt) locParts.push(buurt);
+          if (wijk)  locParts.push(wijk);
+          if (sd)    locParts.push(sd);
+          if (locParts.length) popupLines.push(locParts.join(', '));
+          if (pc6) popupLines.push('PC6: ' + pc6);
+
+          var color = getCategoryColor(cat);
+          var marker = L.circleMarker([lat, lon], {
+            radius: 6,
+            color: color,
+            fillColor: color,
+            weight: 1,
+            fillOpacity: 0.85,
+            pane: 'markers'
+          }).bindPopup(popupLines.join('<br>'));
+
+          marker.addTo(map);
+
+          var idx = orgMarkers.length;
+          orgMarkers.push({
+            idx: idx,
+            marker: marker,
+            category: cat,
+            rawCategory: catRaw,
+            name: name,
+            pc6: pc6,
+            stadsdeel: sd,
+            wijk: wijk,
+            buurt: buurt,
+            lat: lat,
+            lon: lon
+          });
+        });
+
+        buildCategories();
+        buildAreaFilters();
+        buildLegend();
+        applyFilter();
+        updateOrgList();
+      }
     });
+  })
+  .catch(function (err) {
+    console.error('Failed to load Organisaties.csv', err);
+  });
 
-    buildCategories();
-    buildAreaFilters();
-    buildLegend();
-    applyFilter();
-    updateOrgList();
   }
 });
 
@@ -450,7 +494,7 @@ fetch('geojson_lnglat.json')
   });
 
 // --- Load stadsdeel borders + labels + zoom on click ---
-fetch('geojson_lnglat_ stadsdelen.json')
+fetch('geojson_lnglat_stadsdelen.json')
   .then(function (r) { return r.json(); })
   .then(function (data) {
     L.geoJSON(data, {
