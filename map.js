@@ -19,38 +19,39 @@ var wijkenSet = new Set();
 
 // Category color mapping (same as before, with merges in normalizeCategory)
 var categoryColors = {
-  'Informele zorgdragers': '#ffdd00',          // bright yellow
-  'Maatschappelijke organisatie': '#006400',  // dark green
-  'Ouder en Kind Teams': '#00a676',            // vivid teal
-  'Participatieorganisatie': '#0047ab',       // strong cobalt blue
+  'Informele zorgdragers': '#ffdd00',
+  'Maatschappelijke organisatie': '#006400',
+  'Ouder en Kind Teams': '#00a676',
+  'Participatieorganisatie': '#0047ab',
 
-  'Basisscholen': '#ff8c00',                   // dark orange
-  'MBO': '#00b4d8',                            // cyan
-  'Voortgezet onderwijs': '#7a7a7a',           // mid grey
-  'Hogescholen/Universiteiten': '#5a189a',     // deep purple
+  'Basisscholen': '#ff8c00',
+  'MBO': '#00b4d8',
+  'Voortgezet onderwijs': '#7a7a7a',
+  'Hogescholen/Universiteiten': '#5a189a',
 
-  'Jongeren organisaties': '#c1121f',          // crimson
-  'Kinderopvang': '#ff595e',                   // bright coral
-  'Opvang': '#8b0000',                         // dark red
+  'Jongeren organisaties': '#c1121f',
+  'Kinderopvang': '#ff595e',
+  'Opvang': '#8b0000',
 
-  'Bewonersgroepen': '#1d3557',                // navy
-  'Buurtcentrum': '#e10600',                   // fire red
-  'Buurt media': '#0077b6',                    // strong blue
-  'Buurt team': '#3c096c',                     // indigo
-  'Buurtbemiddelaar': '#000000',               // black
+  'Bewonersgroepen': '#1d3557',
+  'Buurtcentrum': '#e10600',
+  'Buurt media': '#0077b6',
+  'Buurt team': '#3c096c',
+  'Buurtbemiddelaar': '#000000',
 
-  'Cultureel centrum': '#9b5de5',              // electric purple
-  'Religieuze organisaties': '#7f5539',        // dark brown
+  'Cultureel centrum': '#9b5de5',
+  'Religieuze organisaties': '#7f5539',
 
-  'Sportvereniging': '#00f5d4',                // neon turquoise
-  'Sportverenigingen': '#03045e',              // deep blue
+ 
+  'Sportverenigingen': '#03045e',
 
-  'Wildplakken': '#ffb000',                    // signal yellow-orange
-  'Plakzuilen': '#bc6c25',                     // ochre
+  'Wildplakken': '#ffb000',
+  'Plakzuilen': '#bc6c25',
 
-  'Vrouwen organisaties': '#f781bf'            // KEEP (pink)
-  'Stadsdorpen': '#6a4c93',   // warm violet
+  'Vrouwen organisaties': '#f781bf',  // <-- comma added
+  'Stadsdorpen': '#6a4c93'
 };
+
 
 
 
@@ -85,6 +86,12 @@ if (cat === 'Buurtcentrum/(Informele) Zorgdragers')
   return 'Buurtcentrum';
 
 // Sport: spelling variant -> plural
+if (cat === 'Sport vereniging')
+  return 'Sportverenigingen';
+// Sportvereniging → Sportverenigingen
+if (cat === 'Sportvereniging')
+  return 'Sportverenigingen';
+
 if (cat === 'Sport vereniging')
   return 'Sportverenigingen';
 
