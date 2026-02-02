@@ -450,7 +450,7 @@ fetch('geojson_lnglat.json')
   });
 
 // --- Load stadsdeel borders + labels + zoom on click ---
-fetch('geojson_lnglat_stadsdelen.json')
+fetch('geojson_lnglat_ stadsdelen.json')
   .then(function (r) { return r.json(); })
   .then(function (data) {
     L.geoJSON(data, {
