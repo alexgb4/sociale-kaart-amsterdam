@@ -122,6 +122,7 @@ if (cat === 'Sport vereniging') return 'Sportverenigingen';
     return 'Stadsdorpen';
 
 
+
   return cat;
   
 }
