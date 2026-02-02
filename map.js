@@ -1,15 +1,12 @@
-// ============================
-// Sociale Kaart Amsterdam - map.js
-// Robust / typo-tolerant version
-// ============================
+// -----------------------
+// Sociale Kaart - map.js
+// -----------------------
 
-// Basic error visibility (so you don't get a silent blank page)
-window.addEventListener('error', function (e) {
-  console.error('JS error:', e.message, e.filename, e.lineno);
-});
+/* global L, Papa */
 
-// Initialize map
+// ---------- Map init ----------
 var map = L.map('map').setView([52.37, 4.90], 11);
+
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
   attribution: '&copy; OpenStreetMap'
@@ -22,34 +19,13 @@ map.getPane('polygons').style.zIndex = 200;
 map.createPane('markers');
 map.getPane('markers').style.zIndex = 400;
 
+// ---------- State ----------
 var orgMarkers = [];
 var categoriesSet = new Set();
 var stadsdelenSet = new Set();
 var wijkenSet = new Set();
 
-// ----------------------------
-// Helper: try multiple filenames (no Promise.any)
-// ----------------------------
-function fetchFirstJson(urls) {
-  var i = 0;
-  function tryNext() {
-    if (i >= urls.length) return Promise.reject(new Error('All URLs failed: ' + urls.join(', ')));
-    var url = urls[i++];
-    return fetch(url)
-      .then(function (r) {
-        if (!r.ok) return tryNext();
-        return r.json();
-      })
-      .catch(function () {
-        return tryNext();
-      });
-  }
-  return tryNext();
-}
-
-// ----------------------------
-// Category colors
-// ----------------------------
+// ---------- Colors ----------
 var categoryColors = {
   'Informele zorgdragers': '#ffdd00',
   'Maatschappelijke organisatie': '#006400',
@@ -78,8 +54,8 @@ var categoryColors = {
 
   'Wildplakken': '#ffb000',
   'Plakzuilen': '#bc6c25',
-
   'Vrouwen organisaties': '#f781bf',
+
   'Stadsdorpen': '#6a4c93'
 };
 
@@ -89,88 +65,22 @@ function getCategoryColor(cat) {
 
   // deterministic fallback color
   var hash = 0;
-  for (var i = 0; i < cat.length; i++) {
-    hash = cat.charCodeAt(i) + ((hash << 5) - hash);
-  }
+  for (var i = 0; i < cat.length; i++) hash = cat.charCodeAt(i) + ((hash << 5) - hash);
+
   var r = (hash >> 0) & 0xFF;
   var g = (hash >> 8) & 0xFF;
   var b = (hash >> 16) & 0xFF;
   return 'rgb(' + (r % 200) + ',' + (g % 200) + ',' + (b % 200) + ')';
 }
 
-// ----------------------------
-// Normalize categories (merge variants)
-// ----------------------------
-function normalizeCategory(cat) {
-  cat = (cat || '').trim();
-
-  // Religieuze: singular -> plural
-  if (cat === 'Religieuze organisatie') return 'Religieuze organisaties';
-
-  // Buurtcentrum + (Informele) Zorgdragers -> Buurtcentrum
-  if (cat === 'Buurtcentrum/(Informele) Zorgdragers') return 'Buurtcentrum';
-
-  // Sport variants -> Sportverenigingen
-  if (cat === 'Sport vereniging') return 'Sportverenigingen';
-  if (cat === 'Sportvereniging') return 'Sportverenigingen';
-  if (cat === 'Sportverengingen') return 'Sportverenigingen'; // common typo
-  if (cat === 'Sportverenigingen') return 'Sportverenigingen';
-
-  // Other merges / typos
-  if (cat === 'Buurt centrum') return 'Buurtcentrum';
-  if (cat === 'Buurt meda') return 'Buurt media';
-  if (cat === 'Bewonersgroep/organisatie') return 'Bewonersgroepen';
-
-  if (cat === 'Bibliotheek/Buurt centrum') return 'Buurtcentrum';
-  if (cat === 'Buurtcentrum/Informele zorgdragers') return 'Buurtcentrum';
-  if (cat === 'Opvang') return 'Buurtcentrum';
-  if (cat === 'Woonzorg centrum') return 'Buurtcentrum';
-  if (cat === 'Cultureelcentrum') return 'Buurtcentrum';
-
-  if (cat === 'App') return 'Jongeren organisaties';
-
-  if (cat === 'Jongeren organisatie' || cat === 'Jongeren organsiatie')
-    return 'Jongeren organisaties';
-
-  if (cat === 'Meiden Organisaties' || cat === 'Meiden organisaties')
-    return 'Vrouwen organisaties';
-
-  if (cat === 'Voortgezet Onderwijs')
-    return 'Voortgezet onderwijs';
-
-  if (cat === 'Vrouwen Organisaties')
-    return 'Vrouwen organisaties';
-
-  // Stadsdorpen (all variants)
-  if (/stadsdorp/i.test(cat))
-    return 'Stadsdorpen';
-
-  return cat;
-}
-
-// ----------------------------
-// Pastel color for wijken
-// ----------------------------
-function pastelColor(name) {
-  name = name || '';
-  var hash = 0;
-  for (var i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  var h = Math.abs(hash) % 360;
-  return 'hsl(' + h + ', 60%, 80%)';
-}
-
-// ----------------------------
-// CSV parsing helpers
-// ----------------------------
+// ---------- Helpers (robust CSV headers + numbers) ----------
 function cleanNumber(x) {
   if (x === null || x === undefined) return NaN;
   return parseFloat(String(x).trim().replace(',', '.'));
 }
 
 function getAny(row, keys) {
-  // Try exact keys first
+  // direct match first
   for (var i = 0; i < keys.length; i++) {
     var k = keys[i];
     if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') {
@@ -178,8 +88,8 @@ function getAny(row, keys) {
     }
   }
 
-  // Try "same key but with spaces/odd headers"
-  var rowKeys = Object.keys(row || {});
+  // fuzzy match: ignore spaces + case
+  var rowKeys = Object.keys(row);
   for (var j = 0; j < keys.length; j++) {
     var wanted = keys[j].toLowerCase().replace(/\s+/g, '');
     for (var r = 0; r < rowKeys.length; r++) {
@@ -190,115 +100,256 @@ function getAny(row, keys) {
       }
     }
   }
+
   return '';
 }
 
-// ----------------------------
-// Load organisations (CSV)
-// ----------------------------
-function loadOrganisationsCSV() {
-  fetch('Organisaties.csv')
-    .then(function (r) {
-      if (!r.ok) throw new Error('Cannot load Organisaties.csv (HTTP ' + r.status + ')');
-      return r.text();
-    })
-    .then(function (text) {
-      // Remove weird leading delimiter-only lines
-      text = text.replace(/^(;+\s*\r?\n)+/g, '');
+// ---------- Category normalization (merges) ----------
+function normalizeCategory(cat) {
+  cat = (cat || '').trim();
 
-      Papa.parse(text, {
-        header: true,
-        delimiter: ';',              // your file is ; separated
-        skipEmptyLines: 'greedy',
-        transformHeader: function (h) { return (h || '').trim(); },
-        complete: function (results) {
-          var data = results.data || [];
-          var seen = {};
+  // Religieuze: singular -> plural
+  if (cat === 'Religieuze organisatie') return 'Religieuze organisaties';
 
-          data.forEach(function (row) {
-            var name = getAny(row, ['Vestigingnaam', 'Vestigingnaam ', 'Naam', 'Organisatie']);
-            var pc6  = getAny(row, ['PC6', 'Pc6', 'Postcode', 'Postcode6']);
-            if (!name && !pc6) return;
+  // Buurtcentrum + (Informele) Zorgdragers -> Buurtcentrum
+  if (cat === 'Buurtcentrum/(Informele) Zorgdragers') return 'Buurtcentrum';
 
-            var key = (name.toLowerCase() || '') + '|' + (pc6.toLowerCase() || '');
-            if (seen[key]) return;
-            seen[key] = true;
+  // Sport: merge ALL into Sportverenigingen
+  if (cat === 'Sport vereniging') return 'Sportverenigingen';
+  if (cat === 'Sportvereniging') return 'Sportverenigingen';
 
-            var gemeente = getAny(row, ['Gemeente']);
-            if (gemeente === 'Diemen') return;
+  // Fixes / typos you had
+  if (cat === 'Buurt centrum') return 'Buurtcentrum';
+  if (cat === 'Buurt meda') return 'Buurt media';
+  if (cat === 'Bewonersgroep/organisatie') return 'Bewonersgroepen';
 
-            var wijk  = getAny(row, ['Wijk']);
-            var sd    = getAny(row, ['Stadsdeel', 'Stadsdelen']);
-            var buurt = getAny(row, ['Buurten', 'Buurt']);
+  if (cat === 'Bibliotheek/Buurt centrum') return 'Buurtcentrum';
+  if (cat === 'Buurtcentrum/Informele zorgdragers') return 'Buurtcentrum';
+  if (cat === 'Woonzorg centrum') return 'Buurtcentrum';
+  if (cat === 'Cultureelcentrum') return 'Buurtcentrum';
 
-            if (sd)   stadsdelenSet.add(sd);
-            if (wijk) wijkenSet.add(wijk);
+  // NOTE: you previously mapped "Opvang" to Buurtcentrum.
+  // If you want to KEEP Opvang as a separate category, delete the next line.
+  if (cat === 'Opvang') return 'Buurtcentrum';
 
-            var catRaw = getAny(row, ['Instelling/Categorie', 'Instelling/ Categorie', 'Categorie', 'Category']);
-            var cat = normalizeCategory(catRaw);
-            if (cat) categoriesSet.add(cat);
+  if (cat === 'App') return 'Jongeren organisaties';
+  if (cat === 'Jongeren organisatie' || cat === 'Jongeren organsiatie') return 'Jongeren organisaties';
 
-            var lat = cleanNumber(getAny(row, ['Latitude', 'Lat']));
-            var lon = cleanNumber(getAny(row, ['Longitude', 'Lon', 'Lng', 'Long']));
+  if (cat === 'Meiden Organisaties' || cat === 'Meiden organisaties') return 'Vrouwen organisaties';
+  if (cat === 'Voortgezet Onderwijs') return 'Voortgezet onderwijs';
+  if (cat === 'Vrouwen Organisaties') return 'Vrouwen organisaties';
 
-            if (!lat || !lon || isNaN(lat) || isNaN(lon)) return;
+  // Stadsdorpen variants
+  if (cat.toLowerCase().includes('stadsdorp')) return 'Stadsdorpen';
 
-            var popupLines = [];
-            if (name) popupLines.push('<b>' + name + '</b>');
-            if (catRaw) popupLines.push(catRaw);
-
-            var locParts = [];
-            if (buurt) locParts.push(buurt);
-            if (wijk)  locParts.push(wijk);
-            if (sd)    locParts.push(sd);
-            if (locParts.length) popupLines.push(locParts.join(', '));
-            if (pc6) popupLines.push('PC6: ' + pc6);
-
-            var color = getCategoryColor(cat);
-            var marker = L.circleMarker([lat, lon], {
-              radius: 6,
-              color: color,
-              fillColor: color,
-              weight: 1,
-              fillOpacity: 0.85,
-              pane: 'markers'
-            }).bindPopup(popupLines.join('<br>'));
-
-            marker.addTo(map);
-
-            var idx = orgMarkers.length;
-            orgMarkers.push({
-              idx: idx,
-              marker: marker,
-              category: cat,
-              rawCategory: catRaw,
-              name: name,
-              pc6: pc6,
-              stadsdeel: sd,
-              wijk: wijk,
-              buurt: buurt,
-              lat: lat,
-              lon: lon
-            });
-          });
-
-          buildCategories();
-          buildAreaFilters();
-          buildLegend();
-          applyFilter();
-          updateOrgList();
-        }
-      });
-    })
-    .catch(function (err) {
-      console.error('Failed to load Organisaties.csv', err);
-      alert('CSV load failed: ' + err.message);
-    });
+  return cat;
 }
 
-// ----------------------------
-// UI builders
-// ----------------------------
+// ---------- Pastel fill for wijk polygons ----------
+function pastelColor(name) {
+  name = name || '';
+  var hash = 0;
+  for (var i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  var h = Math.abs(hash) % 360;
+  return 'hsl(' + h + ', 60%, 80%)';
+}
+
+// ---------- Fetch helper: try multiple URLs until one works ----------
+function fetchFirstJson(urls) {
+  var i = 0;
+  function tryNext() {
+    if (i >= urls.length) return Promise.reject(new Error('All URLs failed'));
+    var url = urls[i++];
+    return fetch(url).then(function (r) {
+      if (!r.ok) return tryNext();
+      return r.json();
+    }).catch(function () { return tryNext(); });
+  }
+  return tryNext();
+}
+
+function showFatal(msg) {
+  console.error(msg);
+  var box = document.getElementById('org-list-content');
+  if (box) box.innerHTML = '<div style="color:#b00020"><b>Error:</b> ' + msg + '</div>';
+}
+
+// ---------- Load GeoJSON polygons ----------
+fetchFirstJson([
+  'geojson_lnglat.json',
+  'geojson_latlng.json'
+]).then(function (data) {
+  L.geoJSON(data, {
+    pane: 'polygons',
+    style: function (feature) {
+      var wijknaam =
+        (feature.properties && (feature.properties.Wijk || feature.properties.WIJK || feature.properties.Wijknaam || feature.properties.WijkNaam)) ||
+        '';
+      return {
+        color: '#777777',
+        weight: 2,
+        fillColor: pastelColor(wijknaam),
+        fillOpacity: 0.30
+      };
+    },
+    onEachFeature: function (feature, layer) {
+      var wijk = (feature.properties && (feature.properties.Wijk || feature.properties.WIJK)) || '';
+      var sd   = (feature.properties && (feature.properties.Stadsdeel || feature.properties.stadsdeel)) || '';
+
+      var label = wijk && sd ? (wijk + ' – ' + sd) : (wijk || sd || 'Onbekende wijk');
+
+      layer.bindTooltip(label, {
+        sticky: true,
+        className: 'wijk-label',
+        direction: 'top',
+        offset: [0, -10]
+      });
+
+      layer.on('click', function () {
+        map.fitBounds(layer.getBounds(), { padding: [20, 20] });
+      });
+    }
+  }).addTo(map);
+}).catch(function () {
+  console.warn('Wijk polygons not loaded (ok to continue).');
+});
+
+// stadsdelen borders (try both “clean” and “space in filename” variants)
+fetchFirstJson([
+  'geojson_lnglat_stadsdelen.json',
+  'geojson_lnglat_%20stadsdelen.json',     // if you accidentally have a space after underscore
+  'geojson_lnglat_%20stadsdelen.json',
+  'geojson_latlng_stadsdelen.json',
+  'geojson_latlng%20stadsdelen.json'       // if you have "geojson_latlng stadsdelen.json"
+]).then(function (data) {
+  L.geoJSON(data, {
+    pane: 'polygons',
+    style: {
+      color: '#000000',
+      weight: 4,
+      dashArray: '4 3',
+      fillOpacity: 0
+    },
+    onEachFeature: function (feature, layer) {
+      var sd = (feature.properties && (feature.properties.Stadsdeel || feature.properties.stadsdeel)) || 'Onbekend stadsdeel';
+
+      layer.bindTooltip(sd, {
+        sticky: true,
+        className: 'stadsdeel-label',
+        direction: 'top',
+        offset: [0, -12]
+      });
+
+      layer.on('click', function () {
+        map.fitBounds(layer.getBounds(), { padding: [30, 30] });
+      });
+    }
+  }).addTo(map);
+}).catch(function () {
+  console.warn('Stadsdelen borders not loaded (ok to continue).');
+});
+
+// ---------- Load CSV markers ----------
+fetch('Organisaties.csv')
+  .then(function (r) { return r.text(); })
+  .then(function (text) {
+    // remove weird leading ;;;;;; lines
+    text = text.replace(/^(;+\s*\r?\n)+/g, '');
+
+    // pick delimiter (very dumb detection)
+    var delimiter = text.indexOf(';') !== -1 ? ';' : ',';
+
+    Papa.parse(text, {
+      header: true,
+      delimiter: delimiter,
+      skipEmptyLines: 'greedy',
+      transformHeader: function (h) { return (h || '').trim(); },
+      complete: function (results) {
+        var data = results.data || [];
+        var seen = {};
+
+        data.forEach(function (row) {
+          var name = getAny(row, ['Vestigingnaam', 'Naam', 'Vestigingsnaam']);
+          var pc6  = getAny(row, ['PC6', 'Postcode', 'Postcode6']);
+
+          if (!name && !pc6) return;
+
+          var key = (name.toLowerCase() || '') + '|' + (pc6.toLowerCase() || '');
+          if (seen[key]) return;
+          seen[key] = true;
+
+          var gemeente = getAny(row, ['Gemeente']);
+          if (gemeente === 'Diemen') return;
+
+          var wijk  = getAny(row, ['Wijk']);
+          var sd    = getAny(row, ['Stadsdeel']);
+          var buurt = getAny(row, ['Buurten', 'Buurt']);
+
+          if (sd) stadsdelenSet.add(sd);
+          if (wijk) wijkenSet.add(wijk);
+
+          var catRaw = getAny(row, ['Instelling/Categorie', 'Categorie', 'Category', 'Instelling/ Categorie']);
+          var cat = normalizeCategory(catRaw);
+          if (cat) categoriesSet.add(cat);
+
+          var lat = cleanNumber(getAny(row, ['Latitude', 'Lat']));
+          var lon = cleanNumber(getAny(row, ['Longitude', 'Lon', 'Lng', 'Long']));
+
+          if (isNaN(lat) || isNaN(lon)) return;
+
+          var popupLines = [];
+          if (name) popupLines.push('<b>' + name + '</b>');
+          if (catRaw) popupLines.push(catRaw);
+
+          var locParts = [];
+          if (buurt) locParts.push(buurt);
+          if (wijk)  locParts.push(wijk);
+          if (sd)    locParts.push(sd);
+          if (locParts.length) popupLines.push(locParts.join(', '));
+          if (pc6) popupLines.push('PC6: ' + pc6);
+
+          var color = getCategoryColor(cat);
+
+          var marker = L.circleMarker([lat, lon], {
+            radius: 6,
+            color: color,
+            fillColor: color,
+            weight: 1,
+            fillOpacity: 0.85,
+            pane: 'markers'
+          }).bindPopup(popupLines.join('<br>'));
+
+          marker.addTo(map);
+
+          var idx = orgMarkers.length;
+          orgMarkers.push({
+            idx: idx,
+            marker: marker,
+            category: cat,
+            rawCategory: catRaw,
+            name: name,
+            pc6: pc6,
+            stadsdeel: sd,
+            wijk: wijk,
+            buurt: buurt
+          });
+        });
+
+        buildCategories();
+        buildAreaFilters();
+        buildLegend();
+        applyFilter();
+        updateOrgList();
+
+        console.log('Loaded markers:', orgMarkers.length);
+      }
+    });
+  })
+  .catch(function (err) {
+    showFatal('Failed to load Organisaties.csv. Check file name + commit. (' + err + ')');
+  });
+
+// ---------- UI Builders ----------
 function buildCategories() {
   var box = document.getElementById('categories');
   if (!box) return;
@@ -323,13 +374,13 @@ function buildCategories() {
 }
 
 function buildAreaFilters() {
-  var sdSelect   = document.getElementById('filter-stadsdeel');
+  var sdSelect = document.getElementById('filter-stadsdeel');
   var wijkSelect = document.getElementById('filter-wijk');
   if (!sdSelect || !wijkSelect) return;
 
-  // reset existing options but keep first (usually "All")
-  while (sdSelect.options.length > 1) sdSelect.remove(1);
-  while (wijkSelect.options.length > 1) wijkSelect.remove(1);
+  // reset (keep first option)
+  sdSelect.innerHTML = '<option value="">Alle stadsdelen</option>';
+  wijkSelect.innerHTML = '<option value="">Alle wijken</option>';
 
   Array.from(stadsdelenSet).sort().forEach(function (sd) {
     var opt = document.createElement('option');
@@ -365,21 +416,22 @@ function buildLegend() {
   });
 }
 
+// ---------- Filtering ----------
 function applyFilter() {
   var active = [];
   document.querySelectorAll('#categories input.cat-filter:checked')
     .forEach(function (cb) { active.push(cb.value); });
 
-  var sdSelect   = document.getElementById('filter-stadsdeel');
+  var sdSelect = document.getElementById('filter-stadsdeel');
   var wijkSelect = document.getElementById('filter-wijk');
 
-  var selectedSd   = sdSelect   ? sdSelect.value   : '';
+  var selectedSd = sdSelect ? sdSelect.value : '';
   var selectedWijk = wijkSelect ? wijkSelect.value : '';
 
   orgMarkers.forEach(function (obj) {
-    var catOk  = (active.length === 0) || active.indexOf(obj.category) !== -1;
-    var sdOk   = !selectedSd   || obj.stadsdeel === selectedSd;
-    var wijkOk = !selectedWijk || obj.wijk      === selectedWijk;
+    var catOk = (active.length === 0) || active.indexOf(obj.category) !== -1;
+    var sdOk = !selectedSd || obj.stadsdeel === selectedSd;
+    var wijkOk = !selectedWijk || obj.wijk === selectedWijk;
 
     if (catOk && sdOk && wijkOk) {
       if (!map.hasLayer(obj.marker)) obj.marker.addTo(map);
@@ -391,6 +443,7 @@ function applyFilter() {
   updateOrgList();
 }
 
+// ---------- Org list ----------
 function updateOrgList() {
   var container = document.getElementById('org-list-content');
   if (!container) return;
@@ -404,10 +457,9 @@ function updateOrgList() {
   document.querySelectorAll('#categories input.cat-filter:checked')
     .forEach(function (cb) { activeCats.push(cb.value); });
 
-  var sdSelect   = document.getElementById('filter-stadsdeel');
+  var sdSelect = document.getElementById('filter-stadsdeel');
   var wijkSelect = document.getElementById('filter-wijk');
-
-  var selectedSd   = sdSelect   ? sdSelect.value   : '';
+  var selectedSd = sdSelect ? sdSelect.value : '';
   var selectedWijk = wijkSelect ? wijkSelect.value : '';
 
   var groups = {};
@@ -416,12 +468,13 @@ function updateOrgList() {
     if (!map.hasLayer(obj.marker)) return;
     if (!bounds.contains(obj.marker.getLatLng())) return;
 
-    var catOk  = (activeCats.length === 0) || activeCats.indexOf(obj.category) !== -1;
-    var sdOk   = !selectedSd   || obj.stadsdeel === selectedSd;
-    var wijkOk = !selectedWijk || obj.wijk      === selectedWijk;
+    var catOk = (activeCats.length === 0) || activeCats.indexOf(obj.category) !== -1;
+    var sdOk = !selectedSd || obj.stadsdeel === selectedSd;
+    var wijkOk = !selectedWijk || obj.wijk === selectedWijk;
     if (!catOk || !sdOk || !wijkOk) return;
 
     var key = (groupMode === 'wijk') ? (obj.wijk || 'Onbekende wijk') : (obj.category || 'Onbekende categorie');
+
     if (!groups[key]) groups[key] = [];
     groups[key].push(obj);
   });
@@ -463,12 +516,15 @@ function updateOrgList() {
   });
 }
 
-// When group mode changes, rebuild org list
+// Update org list when map moves
+map.on('moveend', updateOrgList);
+
+// Group mode change
 document.querySelectorAll('input[name="group-mode"]').forEach(function (radio) {
   radio.addEventListener('change', updateOrgList);
 });
 
-// Sidebar toggle (if elements exist)
+// Sidebar toggle
 var toggleBtn = document.getElementById('toggle-btn');
 if (toggleBtn) {
   toggleBtn.onclick = function () {
@@ -487,83 +543,6 @@ if (toggleBtn) {
     setTimeout(function () { map.invalidateSize(); }, 320);
   };
 }
-
-// ----------------------------
-// Load wijk polygons (try both filename styles)
-// ----------------------------
-fetchFirstJson(['geojson_lnglat.json', 'geojson_latlng.json'])
-  .then(function (data) {
-    L.geoJSON(data, {
-      pane: 'polygons',
-      style: function (feature) {
-        var wijknaam =
-          (feature.properties && (feature.properties.Wijk || feature.properties.WIJK || feature.properties.Wijknaam || feature.properties.WijkNaam)) ||
-          '';
-        return {
-          color: '#777777',
-          weight: 2,
-          fillColor: pastelColor(wijknaam),
-          fillOpacity: 0.30
-        };
-      },
-      onEachFeature: function (feature, layer) {
-        var wijk = (feature.properties && (feature.properties.Wijk || feature.properties.WIJK)) || '';
-        var sd   = (feature.properties && (feature.properties.Stadsdeel || feature.properties.stadsdeel)) || '';
-
-        var label = wijk && sd ? (wijk + ' – ' + sd) : (wijk || sd || 'Onbekende wijk');
-
-        layer.bindTooltip(label, {
-          sticky: true,
-          className: 'wijk-label',
-          direction: 'top',
-          offset: [0, -10]
-        });
-
-        layer.on('click', function () {
-          map.fitBounds(layer.getBounds(), { padding: [20, 20] });
-        });
-      }
-    }).addTo(map);
-  })
-  .catch(function (err) {
-    console.error('Failed to load wijk geojson', err);
-  });
-
-// ----------------------------
-// Load stadsdeel borders (try both filename styles)
-// ----------------------------
-fetchFirstJson(['geojson_lnglat_stadsdelen.json', 'geojson_latlng_stadsdelen.json'])
-  .then(function (data) {
-    L.geoJSON(data, {
-      pane: 'polygons',
-      style: {
-        color: '#000000',
-        weight: 4,
-        dashArray: '4 3',
-        fillOpacity: 0
-      },
-      onEachFeature: function (feature, layer) {
-        var sd = (feature.properties && (feature.properties.Stadsdeel || feature.properties.stadsdeel)) || 'Onbekend stadsdeel';
-
-        layer.bindTooltip(sd, {
-          sticky: true,
-          className: 'stadsdeel-label',
-          direction: 'top',
-          offset: [0, -12]
-        });
-
-        layer.on('click', function () {
-          map.fitBounds(layer.getBounds(), { padding: [30, 30] });
-        });
-      }
-    }).addTo(map);
-  })
-  .catch(function (err) {
-    console.error('Failed to load stadsdelen geojson', err);
-  });
-
-// Update org list when map moves
-map.on('moveend', updateOrgList);
 
 // Finally: load the CSV points
 loadOrganisationsCSV();
