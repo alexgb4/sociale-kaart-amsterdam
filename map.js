@@ -49,6 +49,7 @@ var categoryColors = {
   'Plakzuilen': '#bc6c25',                     // ochre
 
   'Vrouwen organisaties': '#f781bf'            // KEEP (pink)
+  'Stadsdorpen': '#6a4c93',   // warm violet
 };
 
 
@@ -111,8 +112,13 @@ if (cat === 'Sport vereniging')
     return 'Voortgezet onderwijs';
   if (cat === 'Vrouwen Organisaties')
     return 'Vrouwen organisaties';
+    // Stadsdorpen (all variants)
+  if (cat.toLowerCase().includes('stadsdorp'))
+    return 'Stadsdorpen';
+
 
   return cat;
+  
 }
 
 // Pastel color for wijken
