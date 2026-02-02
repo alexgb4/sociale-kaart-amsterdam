@@ -58,6 +58,7 @@ var categoryColors = {
 
 
 
+
 function getCategoryColor(cat) {
   cat = (cat || '').trim();
   if (categoryColors[cat]) return categoryColors[cat];
