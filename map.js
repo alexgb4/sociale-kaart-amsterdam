@@ -12,10 +12,22 @@ map.getPane('polygons').style.zIndex = 200;
 map.createPane('markers');
 map.getPane('markers').style.zIndex = 400;
 
+function fetchFirstJson(urls) {
+  return Promise.any(
+    urls.map(function (u) {
+      return fetch(u).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      });
+    })
+  );
+}
+
 var orgMarkers = [];
 var categoriesSet = new Set();
 var stadsdelenSet = new Set();
 var wijkenSet = new Set();
+
 
 // Category color mapping (same as before, with merges in normalizeCategory)
 var categoryColors = {
@@ -456,7 +468,7 @@ document.getElementById('toggle-btn').onclick = function() {
 };
 
 // --- Load wijk polygons (pastel areas) + labels + zoom on click ---
-fetch('geojson_lnglat.json')
+fetchFirstJson(['geojson_lnglat.json', 'geojson_latlng.json'])
   .then(function (r) { return r.json(); })
   .then(function (data) {
     L.geoJSON(data, {
