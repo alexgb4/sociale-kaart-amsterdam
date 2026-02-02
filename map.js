@@ -249,6 +249,30 @@ fetchFirstJson([
   console.warn('Stadsdelen borders not loaded (ok to continue).');
 });
 
+function loadOrganisationsCSV() {
+  fetch('Organisaties.csv')
+    .then(function (r) { return r.text(); })
+    .then(function (text) {
+      text = text.replace(/^(;+\s*\r?\n)+/g, '');
+      var delimiter = text.indexOf(';') !== -1 ? ';' : ',';
+
+      Papa.parse(text, {
+        header: true,
+        delimiter: delimiter,
+        skipEmptyLines: 'greedy',
+        transformHeader: function (h) { return (h || '').trim(); },
+        complete: function (results) {
+          console.log('CSV rows:', (results.data || []).length);
+          // If you already have your marker-building code elsewhere,
+          // call it here or paste that block here.
+        }
+      });
+    })
+    .catch(function (err) {
+      console.error('Failed to load Organisaties.csv', err);
+    });
+}
+
 // ---------- Load CSV markers ----------
 fetch('Organisaties.csv')
   .then(function (r) { return r.text(); })
