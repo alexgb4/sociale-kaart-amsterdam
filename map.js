@@ -49,8 +49,8 @@ var categoryColors = {
   'Plakzuilen': '#bc6c25',
   'Vrouwen organisaties': '#f781bf',
   'Stadsdorpen': '#6a4c93'
-
 };
+
 
 
 
