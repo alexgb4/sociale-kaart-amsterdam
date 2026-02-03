@@ -1,1 +1,1 @@
-
+*.csv -filter -diff -merge text
